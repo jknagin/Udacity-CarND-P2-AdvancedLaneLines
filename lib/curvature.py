@@ -2,8 +2,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
-YM_PER_PIX = 30./720  # meters per pixel in y dimension
-XM_PER_PIX = 3.7/700  # meters per pixel in x dimension
+YM_PER_PIX = 30. / 720  # meters per pixel in y dimension
+XM_PER_PIX = 3.7 / 700  # meters per pixel in x dimension
 
 
 def find_lane_pixels(binary_warped):
@@ -91,7 +91,6 @@ def find_lane_pixels(binary_warped):
 
 
 def fit_poly_helper(img_shape, leftx, lefty, rightx, righty):
-
     # Fit a second order polynomial to each with np.polyfit()
     left_fit = np.polyfit(lefty, leftx, 2)
     right_fit = np.polyfit(righty, rightx, 2)
@@ -111,7 +110,8 @@ def fit_polynomial(binary_warped):
     leftx, lefty, rightx, righty, out_img = find_lane_pixels(binary_warped)
 
     # Perform polynomial fit
-    left_fitx, right_fitx, ploty, left_fit, right_fit = fit_poly_helper(binary_warped.shape, leftx, lefty, rightx, righty)
+    left_fitx, right_fitx, ploty, left_fit, right_fit = fit_poly_helper(binary_warped.shape, leftx, lefty, rightx,
+                                                                        righty)
 
     # Visualization
     # Colors in the left and right lane regions
@@ -150,7 +150,8 @@ def search_around_poly(binary_warped, left_fit, right_fit):
     righty = nonzeroy[right_lane_inds]
 
     # Fit new polynomials
-    left_fitx, right_fitx, ploty, left_fit, right_fit = fit_poly_helper(binary_warped.shape, leftx, lefty, rightx, righty)
+    left_fitx, right_fitx, ploty, left_fit, right_fit = fit_poly_helper(binary_warped.shape, leftx, lefty, rightx,
+                                                                        righty)
 
     # Create an image to draw on and an image to show the selection window
     out_img = np.dstack((binary_warped, binary_warped, binary_warped)) * 255
@@ -184,7 +185,7 @@ def search_around_poly(binary_warped, left_fit, right_fit):
 
 def radius_of_curvature(fit, y_eval):
     a, b, _ = fit
-    r = (1 + (2*a*y_eval + b)**2)**1.5/(np.abs(2*a))
+    r = (1 + (2 * a * y_eval + b) ** 2) ** 1.5 / (np.abs(2 * a))
     return r
 
 
@@ -195,15 +196,25 @@ def measure_curvature(ploty, left_fit, right_fit, units: str):
     right_fitx = np.polyval(right_fit, ploty)
 
     # Calculate new polynomial fit in meters
-    left_fit_m = np.polyfit(ploty*YM_PER_PIX, left_fitx*XM_PER_PIX, 2)
-    right_fit_m = np.polyfit(ploty*YM_PER_PIX, right_fitx*XM_PER_PIX, 2)
+    left_fit_m = np.polyfit(ploty * YM_PER_PIX, left_fitx * XM_PER_PIX, 2)
+    right_fit_m = np.polyfit(ploty * YM_PER_PIX, right_fitx * XM_PER_PIX, 2)
 
     left_radius, right_radius = 0, 0
     if units == "p":
         left_radius = radius_of_curvature(left_fit, y_eval)
         right_radius = radius_of_curvature(right_fit, y_eval)
     elif units == "m":
-        left_radius = radius_of_curvature(left_fit_m, y_eval*YM_PER_PIX)
-        right_radius = radius_of_curvature(right_fit_m, y_eval*YM_PER_PIX)
+        left_radius = radius_of_curvature(left_fit_m, y_eval * YM_PER_PIX)
+        right_radius = radius_of_curvature(right_fit_m, y_eval * YM_PER_PIX)
 
     return left_radius, right_radius
+
+
+def vehicle_position_error(binary_warped, left_fit, right_fit):
+    left_x_intercept = np.polyval(left_fit, binary_warped.shape[0])
+    right_x_intercept = np.polyval(right_fit, binary_warped.shape[0])
+    lane_centerline = (left_x_intercept + right_x_intercept) / 2  # lane centerline is between left and right lanes
+    vehicle_pos = binary_warped.shape[1] / 2  # assume camera is mounted on center of car
+    error = XM_PER_PIX*(vehicle_pos - lane_centerline)  # positioning error in meters, positive means car is to the right of center
+
+    return error

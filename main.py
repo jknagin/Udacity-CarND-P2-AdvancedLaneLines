@@ -44,8 +44,8 @@ def main():
         # Perform polynomial fit on warped binary image
         out_img, ploty, left_fit, right_fit = curvature.fit_polynomial(binary_warped)
         left_radius_m, right_radius_m = curvature.measure_curvature(ploty, left_fit, right_fit, "m")
-
-        print(test_image, left_radius_m, right_radius_m)
+        error = curvature.vehicle_position_error(binary_warped, left_fit, right_fit)
+        print(test_image, left_radius_m, right_radius_m, error)
 
         plt.imshow(out_img)
         plt.title("Sliding Windows: {}".format(test_image))

@@ -120,25 +120,28 @@ def fit_polynomial(binary_warped):
 
 
 def main():
+
+    # Compute camera calibration parameters using camera_cal directory
     calibration_images = glob.glob("camera_cal/calibration*.jpg")
     nx = 9
     ny = 6
-
     ret, mtx, dist = calibration.calibrate_with_chessboard_images(calibration_images, nx, ny)
 
     test_images = glob.glob("test_images/*.jpg")
-    straight_lines = glob.glob("test_images/straight_lines*.jpg")
-    for test_image in test_images:
+    for test_image in ["test_images/test1.jpg", "test_images/test4.jpg"]:
+        # Read image
         img = utils.read_image(test_image)
+
+        # Undistort image
         undistorted = calibration.undistort(img, mtx, dist)
 
-        # Calculate binary matrices via thresholds
-        sobel_kernel = 3
+        # Calculate binary image via sobel, rgb, and hsl thresholds
+        sobel_kernel = 7
         abs_sobel_thresh = (20, 100)
         sobel_mag_thresh = (30, 100)
 
-        red_thresh = (190, 255)
-        green_thresh = (190, 255)
+        red_thresh = (130, 255)
+        green_thresh = (130, 255)
         blue_thresh = (190, 255)
 
         hue_thresh = (20, 90)
@@ -149,13 +152,13 @@ def main():
         rgb_thresh = (red_thresh, green_thresh, blue_thresh)
         hls_thresh = (hue_thresh, lightness_thresh, saturation_thresh)
         binary_output = thresholding.binary_image(undistorted, sobel_kernel, sobel_thresh, rgb_thresh, hls_thresh)
-        utils.plot_two_images(undistorted, binary_output, "undistorted {}".format(test_image), "binary {}".format(test_image), binary=(False, True))
-        utils.show()
-
-        continue
 
         # Warp perspective of binary output to ROI
         binary_warped = perspective.warp_to_roi(binary_output)
+
+        utils.plot_two_images(binary_output, binary_warped, "Binary {}".format(test_image), "Binary warped {}".format(test_image), (True, True))
+        utils.show()
+        continue
 
         # Perform polynomial fit on warped binary image
         out_img = fit_polynomial(binary_warped)

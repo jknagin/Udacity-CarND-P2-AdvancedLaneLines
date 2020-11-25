@@ -199,7 +199,7 @@ def measure_curvature(ploty, left_fit, right_fit, units: str):
     left_fit_m = np.polyfit(ploty * YM_PER_PIX, left_fitx * XM_PER_PIX, 2)
     right_fit_m = np.polyfit(ploty * YM_PER_PIX, right_fitx * XM_PER_PIX, 2)
 
-    left_radius, right_radius = 0, 0
+    left_radius, right_radius = 0, 1
     if units == "p":
         left_radius = radius_of_curvature(left_fit, y_eval)
         right_radius = radius_of_curvature(right_fit, y_eval)

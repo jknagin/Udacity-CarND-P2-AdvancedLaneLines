@@ -58,7 +58,7 @@ def sobel_thresholds(gray, sobel_kernel: int = 3, thresholds: Tuple[Tuple[int]] 
     return abs_sobel_binary & sobel_mag_binary
 
 
-def rgb_threshold(undistorted, thresholds: Tuple[Tuple[int]] = ((0, 255), (0, 255), (0, 255))):
+def rgb_threshold(undistorted, thresholds: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]] = ((0, 255), (0, 255), (0, 255))):
     assert len(thresholds) == 3
     r_thresh, g_thresh, b_thresh = thresholds
     r_binary = red_threshold(undistorted, r_thresh)
@@ -68,13 +68,12 @@ def rgb_threshold(undistorted, thresholds: Tuple[Tuple[int]] = ((0, 255), (0, 25
     return r_binary & g_binary & b_binary
 
 
-def hls_threshold(undistorted, thresholds: Tuple[Tuple[int, int]] = ((0, 255), (0, 255), (0, 255))):
+def hls_threshold(undistorted, thresholds: Tuple[Tuple[int, int], Tuple[int, int], Tuple[int, int]] = ((0, 255), (0, 255), (0, 255))):
     assert len(thresholds) == 3
-    undistorted_hls = utils.hls(undistorted)
     h_thresh, l_thresh, s_thresh = thresholds
-    h_binary = hue_threshold(undistorted_hls, h_thresh)
-    l_binary = lightness_threshold(undistorted_hls, l_thresh)
-    s_binary = saturation_threshold(undistorted_hls, s_thresh)
+    h_binary = hue_threshold(undistorted, h_thresh)
+    l_binary = lightness_threshold(undistorted, l_thresh)
+    s_binary = saturation_threshold(undistorted, s_thresh)
 
     return h_binary & l_binary & s_binary
 
@@ -85,7 +84,7 @@ def binary_image(undistorted, sobel_kernel: int, sobel_thresh, rgb_thresh, hls_t
     rgb_binary = rgb_threshold(undistorted, rgb_thresh)
     hls_binary = hls_threshold(undistorted, hls_thresh)
 
-    return sobel_binary & (rgb_binary | hls_binary)
+    return sobel_binary | rgb_binary | hls_binary
 
 
 def _check_threshold_helper(channel, thresh: Tuple[int, int] = (0, 255), left_inclusive: bool = True):

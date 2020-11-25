@@ -129,32 +129,29 @@ def main():
     test_images = glob.glob("test_images/*.jpg")
     straight_lines = glob.glob("test_images/straight_lines*.jpg")
     for test_image in test_images:
-        print(test_image)
         img = utils.read_image(test_image)
         undistorted = calibration.undistort(img, mtx, dist)
 
         # Calculate binary matrices via thresholds
         sobel_kernel = 3
-        abs_sobel_thresh = (0, 255)
-        sobel_mag_thresh = (0, 255)
+        abs_sobel_thresh = (20, 100)
+        sobel_mag_thresh = (30, 100)
 
-        red_thresh = (0, 255)
-        green_thresh = (0, 255)
-        blue_thresh = (0, 255)
+        red_thresh = (190, 255)
+        green_thresh = (190, 255)
+        blue_thresh = (190, 255)
 
-        hue_thresh = (0, 255)
+        hue_thresh = (20, 90)
         lightness_thresh = (0, 255)
         saturation_thresh = (0, 255)
 
         sobel_thresh = (abs_sobel_thresh, sobel_mag_thresh)
         rgb_thresh = (red_thresh, green_thresh, blue_thresh)
         hls_thresh = (hue_thresh, lightness_thresh, saturation_thresh)
-        # binary_output = thresholding.binary_image(undistorted, sobel_kernel, sobel_thresh, rgb_thresh, hls_thresh)
-        binary_output = thresholding.blue_threshold(undistorted, blue_thresh)
-        print(binary_output)
-
-        utils.plot_two_images(undistorted, binary_output, "Undistorted", "Binary", binary=(False, True))
+        binary_output = thresholding.binary_image(undistorted, sobel_kernel, sobel_thresh, rgb_thresh, hls_thresh)
+        utils.plot_two_images(undistorted, binary_output, "undistorted {}".format(test_image), "binary {}".format(test_image), binary=(False, True))
         utils.show()
+
         continue
 
         # Warp perspective of binary output to ROI

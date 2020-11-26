@@ -39,18 +39,19 @@ def main():
         binary_output = thresholding.binary_image(undistorted, sobel_kernel, sobel_thresh, rgb_thresh, hls_thresh)
 
         # Warp perspective of binary output to ROI
-        binary_warped = perspective.warp_to_roi(binary_output)
+        binary_warped, perspective_transform, inverse_perspective_transform = perspective.warp_to_roi(binary_output)
 
         # Perform polynomial fit on warped binary image
-        out_img, ploty, left_fit, right_fit = curvature.fit_polynomial(binary_warped)
+        out_img, ploty, left_fitx, right_fitx, left_fit, right_fit = curvature.fit_polynomial(binary_warped)
         left_radius_m, right_radius_m = curvature.measure_curvature(ploty, left_fit, right_fit, "m")
         error = curvature.vehicle_position_error(binary_warped, left_fit, right_fit)
-        print(test_image, left_radius_m, right_radius_m, error)
+        left_angle_deg, right_angle_deg = map(curvature.angle_of_curvature, (left_radius_m, right_radius_m))
+        print(test_image, left_radius_m, right_radius_m, error, left_angle_deg, right_angle_deg)
 
-        plt.imshow(out_img)
-        plt.title("Sliding Windows: {}".format(test_image))
-        # plt.figure()
-        # plt.imshow(perspective.warp_to_roi(undistorted))
+        lane_area_img = curvature.overlay_lane_area(undistorted, binary_warped, ploty, left_fitx, right_fitx, inverse_perspective_transform, left_radius_m, right_radius_m, left_angle_deg, right_angle_deg, error)
+
+        plt.imshow(lane_area_img)
+        plt.title("{}".format(test_image))
         plt.show()
 
 

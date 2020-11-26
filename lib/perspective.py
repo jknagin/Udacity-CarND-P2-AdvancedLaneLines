@@ -38,5 +38,6 @@ def warp_to_roi(undistorted):
                              [950, 720]], dtype=np.float32)
 
     perspective_transform = get_perspective_transform(src_vertices, dst_vertices)
+    inverse_perspective_transform = get_perspective_transform(dst_vertices, src_vertices)
     img_transformed = apply_perspective_transform(undistorted, perspective_transform)
-    return img_transformed
+    return img_transformed, perspective_transform, inverse_perspective_transform

@@ -2,6 +2,8 @@ import numpy as np
 import cv2
 import matplotlib.pyplot as plt
 
+from lib import perspective
+
 YM_PER_PIX = 30. / 720  # meters per pixel in y dimension
 XM_PER_PIX = 3.7 / 700  # meters per pixel in x dimension
 
@@ -119,10 +121,10 @@ def fit_polynomial(binary_warped):
     out_img[righty, rightx] = [0, 0, 255]
 
     # Plots the left and right polynomials on the lane lines
-    plt.plot(left_fitx, ploty, color='yellow')
-    plt.plot(right_fitx, ploty, color='yellow')
+    # plt.plot(left_fitx, ploty, color='yellow')
+    # plt.plot(right_fitx, ploty, color='yellow')
 
-    return out_img, ploty, left_fit, right_fit
+    return out_img, ploty, left_fitx, right_fitx, left_fit, right_fit
 
 
 def search_around_poly(binary_warped, left_fit, right_fit):
@@ -189,6 +191,12 @@ def radius_of_curvature(fit, y_eval):
     return r
 
 
+def angle_of_curvature(radius: float) -> float:
+    # radius_of_curvature in meters
+    # return angle of curvature in degrees
+    return 100 / (2 * np.pi * radius) * 360
+
+
 def measure_curvature(ploty, left_fit, right_fit, units: str):
     assert units in {"p", "m"}  # pixels or meters
     y_eval = np.max(ploty)
@@ -215,6 +223,42 @@ def vehicle_position_error(binary_warped, left_fit, right_fit):
     right_x_intercept = np.polyval(right_fit, binary_warped.shape[0])
     lane_centerline = (left_x_intercept + right_x_intercept) / 2  # lane centerline is between left and right lanes
     vehicle_pos = binary_warped.shape[1] / 2  # assume camera is mounted on center of car
-    error = XM_PER_PIX*(vehicle_pos - lane_centerline)  # positioning error in meters, positive means car is to the right of center
+    error = XM_PER_PIX * (
+            vehicle_pos - lane_centerline)  # positioning error in meters, positive means car is to the right of center
 
     return error
+
+
+def overlay_lane_area(undistorted, binary_warped, ploty, left_fitx, right_fitx, inverse_perspective_transform, left_radius, right_radius, left_angle, right_angle, error):
+    # Create blank image to write to
+    zero_channel = np.zeros_like(binary_warped).astype(np.uint8)
+    lane_area_img = np.dstack((zero_channel, zero_channel, zero_channel))
+
+    # Collect left and right lane points into a group of vertices defining the lane area
+    pts_left = np.array([np.transpose(np.vstack([left_fitx, ploty]))])
+    pts_right = np.array([np.flipud(np.transpose(np.vstack([right_fitx, ploty])))])
+    pts = np.hstack((pts_left, pts_right))
+
+    # Fill the inside of the vertices in the blank image
+    cv2.fillPoly(lane_area_img, np.int_([pts]), (0, 255, 0))
+
+    # Apply inverse perspective transform to the lane area
+    lane_area_img_unwarped = perspective.apply_perspective_transform(lane_area_img, inverse_perspective_transform)
+
+    # Calculate weighted sum of undistorted image overlaid with unwarped lane area
+    undistorted_with_lane_area = cv2.addWeighted(undistorted, 1, lane_area_img_unwarped, 0.5, 0)
+
+    # return undistorted_with_lane_area
+
+    # Add text showing radius and angle of curvature and vehicle position
+    font_family = cv2.FONT_HERSHEY_SIMPLEX
+    font_color = (255, 255, 255)
+    font_size = 2
+    font_thickness = 2
+    line_type = cv2.LINE_AA
+
+    cv2.putText(undistorted_with_lane_area, "Lane curvature radius: {} m".format(round(0.5*(left_radius + right_radius), 1)), (50, 50), font_family, font_size, font_color, font_thickness, line_type)
+    cv2.putText(undistorted_with_lane_area, "Lane curvature angle: {} deg".format(round(0.5*(left_angle + right_angle), 1)), (50, 150), font_family, font_size, font_color, font_thickness, line_type)
+    cv2.putText(undistorted_with_lane_area, "Vehicle is {} m {} of center".format(round(error, 2), "left" if error < 0 else "right"), (50, 250), font_family, font_size, font_color, font_thickness, line_type)
+
+    return undistorted_with_lane_area

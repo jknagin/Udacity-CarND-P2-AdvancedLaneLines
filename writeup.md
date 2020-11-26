@@ -12,10 +12,10 @@ The goals / steps of this project are the following:
 * Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 A few points about this submission:
-* This project submission should be run using the Jupyter notebook ```P2.ipynb``` in the top level directory of the submission repo. Hereafter, this notebook will be referred to as "the notebook."
-* The notebook acts as a wrapper running code from the Python files under ```lib/```.
-* The notebook saves the output images from each step of the image pipeline under ```test_images/```
-* The notebook process the project video ```project_video.mp4``` and save it as ```project_video_output.mp4``` in the top-level directory of the submission repo.
+* This project submission should be run using the Jupyter notebook [```P2.ipynb```](./P2.ipynb) in the top level directory of the submission repo. Hereafter, this notebook will be referred to as "the notebook."
+* The notebook acts as a wrapper running code from the Python files under [```lib/```](./lib).
+* The notebook saves the output images from each step of the image pipeline under [```test_images/```](./test_images)
+* The notebook processes the project video [```project_video.mp4```](./project_video.mp4) and saves it as [```project_video_output.mp4```](./project_video_output.mp4) in the top-level directory of the submission repo.
 
 [//]: # (Image References)
 
@@ -87,7 +87,7 @@ Second, the left and right lane pixel coordinates are used to calculate quadrati
 
 Third, the quadratic fits are applied to a sequence of Y values to produce fitted X values. The fitted X and Y values are overlaid on top of the binary warped image as yellow curves.
 
-Fourth, the binary warped images with the left and right lanes colored, and with the quadratic fits shown in yellow, are saved under ```output_images/polynomial_fitting/test_images/```.
+Fourth, the binary warped images with the left and right lanes colored, and with the quadratic fits shown in yellow, are saved under [```output_images/polynomial_fitting/test_images/```](./output_images/polynomial_fitting/test_images).
 
 #### **5. Calculate Radii of Curvature and Vehicle Position Errors**
 

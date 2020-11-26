@@ -45,16 +45,20 @@ def pipeline(raw_image, mtx, dist):
 
     # Perform polynomial fit on warped binary image
     out_img, ploty, left_fitx, right_fitx, left_fit, right_fit = curvature.fit_polynomial(binary_warped)
+
+    # Measure the curvature of the polynomial fits
     left_radius_m, right_radius_m = curvature.measure_curvature(ploty, left_fit, right_fit, "m")
+
+    # Calculate the vehicle positioning error relative to the center of the lane
     error = curvature.vehicle_position_error(binary_warped, left_fit, right_fit)
     left_angle_deg, right_angle_deg = map(curvature.angle_of_curvature, (left_radius_m, right_radius_m))
 
+    # Display curvature and vehicle error info on the undistorted image
     lane_area_img = curvature.overlay_lane_area(undistorted, binary_warped, ploty, left_fitx, right_fitx,
                                                 inverse_perspective_transform, left_radius_m, right_radius_m,
                                                 left_angle_deg, right_angle_deg, error)
 
     return lane_area_img
-
 
 
 def main():

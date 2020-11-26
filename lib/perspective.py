@@ -15,28 +15,7 @@ def apply_perspective_transform(img, perspective_transform):
     return transformed_image
 
 
-def warp_to_roi(undistorted):
-    img_shape = undistorted.shape
-
-    # (lower_left, upper_left, upper_right, lower_right)
-    # src_vertices = np.array([[img_shape[1] * 0.125, img_shape[0]],
-    #                          [img_shape[1] * 0.465, img_shape[0] * 0.6],
-    #                          [img_shape[1] * 0.550, img_shape[0] * 0.6],
-    #                          [img_shape[1] * 0.950, img_shape[0]]], dtype=np.float32)
-    src_vertices = np.array([[200, 720],
-                             [599, 448],
-                             [682, 448],
-                             [1150, 720]], dtype=np.float32)
-
-    # dst_vertices = np.array([[0.1 * img_shape[1], 0.9 * img_shape[0]],
-    #                          [0.1 * img_shape[1], 0.1 * img_shape[0]],
-    #                          [0.9 * img_shape[1], 0.1 * img_shape[1]],
-    #                          [0.9 * img_shape[1], 0.9 * img_shape[0]]], dtype=np.float32)
-    dst_vertices = np.array([[300, 720],
-                             [300, 0],
-                             [950, 0],
-                             [950, 720]], dtype=np.float32)
-
+def warp_to_roi(undistorted, src_vertices, dst_vertices):
     perspective_transform = get_perspective_transform(src_vertices, dst_vertices)
     inverse_perspective_transform = get_perspective_transform(dst_vertices, src_vertices)
     img_transformed = apply_perspective_transform(undistorted, perspective_transform)

@@ -80,9 +80,9 @@ def main():
         lane_area_img = pipeline(raw_image, MTX, DIST)
 
         # Visualize result of pipeline
-        # plt.imshow(lane_area_img)
-        # plt.title("{}".format(test_image))
-        # plt.show()
+        plt.imshow(lane_area_img)
+        plt.title("{}".format(test_image))
+        plt.show()
 
     # # Apply pipeline to video
     # white_output = "project_video_output.mp4"

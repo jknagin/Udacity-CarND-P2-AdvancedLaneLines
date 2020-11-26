@@ -41,7 +41,7 @@ def hue_threshold(undistorted, thresh: Tuple[int, int] = (0, 255)):
 
 def lightness_threshold(undistorted, thresh: Tuple[int, int] = (0, 255)):
     undistorted_hls = utils.hls(undistorted)
-    return _check_threshold_helper(undistorted_hls[:, :, 0], thresh, left_inclusive=False)
+    return _check_threshold_helper(undistorted_hls[:, :, 1], thresh, left_inclusive=False)
 
 
 def saturation_threshold(undistorted, thresh: Tuple[int, int] = (0, 255)):
@@ -74,8 +74,9 @@ def hls_threshold(undistorted, thresholds: Tuple[Tuple[int, int], Tuple[int, int
     h_binary = hue_threshold(undistorted, h_thresh)
     l_binary = lightness_threshold(undistorted, l_thresh)
     s_binary = saturation_threshold(undistorted, s_thresh)
-
-    return h_binary & l_binary & s_binary
+    combined = np.zeros_like(undistorted)
+    combined[(h_binary == 1) | ((l_binary == 1) & (s_binary == 1))] = 1
+    return h_binary | (l_binary & s_binary)
 
 
 def binary_image(undistorted, sobel_kernel: int, sobel_thresh, rgb_thresh, hls_thresh):

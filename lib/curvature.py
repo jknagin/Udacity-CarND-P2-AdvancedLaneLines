@@ -259,6 +259,6 @@ def overlay_lane_area(undistorted, binary_warped, ploty, left_fitx, right_fitx, 
 
     cv2.putText(undistorted_with_lane_area, "Lane curvature radius: {} m".format(round(0.5*(left_radius + right_radius), 1)), (50, 50), font_family, font_size, font_color, font_thickness, line_type)
     cv2.putText(undistorted_with_lane_area, "Lane curvature angle: {} deg".format(round(0.5*(left_angle + right_angle), 1)), (50, 150), font_family, font_size, font_color, font_thickness, line_type)
-    cv2.putText(undistorted_with_lane_area, "Vehicle is {} m {} of center".format(round(error, 2), "left" if error < 0 else "right"), (50, 250), font_family, font_size, font_color, font_thickness, line_type)
+    cv2.putText(undistorted_with_lane_area, "Vehicle is {} m {} of center".format(round(np.abs(error), 2), "left" if error < 0 else "right"), (50, 250), font_family, font_size, font_color, font_thickness, line_type)
 
     return undistorted_with_lane_area
